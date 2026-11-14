@@ -1,0 +1,99 @@
+{
+  "name": "Voice Call AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact Us",
+        "formDescription": "We'll back to you soon",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Full Name"
+            },
+            {
+              "fieldLabel": "Email",
+              "placeholder": "Email"
+            },
+            {
+              "fieldLabel": "Phone Number",
+              "placeholder": "+918667669405"
+            },
+            {
+              "fieldLabel": "Problem Description"
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Get a Call"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f7447d2b-4484-463b-b4c6-c03cf6fdce42",
+      "name": "On form submission",
+      "webhookId": "c845dab7-21ed-4f10-b5dc-65312df96b31"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_2ccf8e1cbf22ef28303492b2796a"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from_number\": \"+19089233868\",\n  \"to_number\": \"{{ $json['Phone Number'] }}\",\n  \"retell_llm_dynamic_variables\": {\n    \"name\": \"{{ $json.Name }}\",\n    \"email\": \"{{ $json.Email }}\",\n    \"phone number\": \"{{ $json['Phone Number'] }}\",\n    \"subject\": \"{{ $json['Problem Description'] }}\"\n  },\n  \"override_agent_id\": \"agent_ad565611d889ff85f86944b4cc\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "7dc628fd-0d4e-419b-ac9c-d1bcc9715eed",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b2e324a1-bfd5-441e-8d4a-17776a4cbffa",
+  "meta": {
+    "instanceId": "8f5fc711d0f537b9c5abb0637fa5f04c0702a9cc70e03d901ca5cf2452b21027"
+  },
+  "nodeGroups": [],
+  "id": "ed9oyZSDILjJ58YI",
+  "tags": []
+}

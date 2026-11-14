@@ -1,0 +1,4072 @@
+{
+  "name": "AlumniMatch - Explainable Alumni Event Engagement Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst e = raw && raw.body ? raw.body : raw;\nfunction toArr(v){ if (Array.isArray(v)) return v; if (typeof v === 'string' && v.trim()) return v.split(/[\\n,]+/).map(function(s){ return s.trim(); }).filter(Boolean); return []; }\nconst req = ['event_id','event_name','event_description','event_date','city','country','event_topic','event_capacity','registration_url','event_status'];\nconst missing = req.filter(function(k){ return e[k] === undefined || e[k] === null || e[k] === ''; });\nconst facts = toArr(e.approved_facts);\nif (!facts.length) { missing.push('approved_facts'); }\nconst out = Object.assign({}, e, {\n  target_industries: toArr(e.target_industries),\n  target_functions: toArr(e.target_functions),\n  target_career_stages: toArr(e.target_career_stages),\n  target_cities: toArr(e.target_cities),\n  approved_speakers: toArr(e.approved_speakers),\n  approved_facts: facts,\n  batch_from: Number(e.batch_from) || 0,\n  batch_to: Number(e.batch_to) || 0,\n  max_invitations: Number(e.max_invitations) || 10,\n  event_capacity: Number(e.event_capacity) || 0,\n  communications_approved: e.communications_approved === true || String(e.communications_approved).toLowerCase() === 'true',\n  city: e.city || '',\n  event_date: e.event_date || '',\n  validation_status: missing.length ? 'FAILED' : 'PASSED',\n  missing_fields: missing,\n  run_id: $execution.id,\n  received_at: new Date().toISOString()\n});\nreturn [{ json: out }];"
+      },
+      "id": "6ed66f7b-4084-480c-9ff4-e352985111f7",
+      "name": "Validate Event Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.validation_status }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "PASSED"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "faccb681-9c64-4fa5-ae8d-f375920df686",
+      "name": "Event Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "EVENTS_DB"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "event_id"
+          ],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_name",
+              "displayName": "event_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_description",
+              "displayName": "event_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_date",
+              "displayName": "event_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_time",
+              "displayName": "event_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "venue",
+              "displayName": "venue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "country",
+              "displayName": "country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_topic",
+              "displayName": "event_topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "target_industries",
+              "displayName": "target_industries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "target_functions",
+              "displayName": "target_functions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "target_career_stages",
+              "displayName": "target_career_stages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approved_speakers",
+              "displayName": "approved_speakers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_capacity",
+              "displayName": "event_capacity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "registration_url",
+              "displayName": "registration_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_fee",
+              "displayName": "event_fee",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approved_facts",
+              "displayName": "approved_facts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_status",
+              "displayName": "event_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "communications_approved",
+              "displayName": "communications_approved",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "value": {
+            "event_id": "={{ $json.event_id }}",
+            "event_name": "={{ $json.event_name }}",
+            "event_description": "={{ $json.event_description }}",
+            "event_date": "={{ $json.event_date }}",
+            "event_time": "={{ $json.event_time }}",
+            "city": "={{ $json.city }}",
+            "venue": "={{ $json.venue }}",
+            "country": "={{ $json.country }}",
+            "event_topic": "={{ $json.event_topic }}",
+            "target_industries": "={{ $json.target_industries.join(\", \") }}",
+            "target_functions": "={{ $json.target_functions.join(\", \") }}",
+            "target_career_stages": "={{ $json.target_career_stages.join(\", \") }}",
+            "approved_speakers": "={{ $json.approved_speakers.join(\", \") }}",
+            "event_capacity": "={{ $json.event_capacity }}",
+            "registration_url": "={{ $json.registration_url }}",
+            "event_fee": "={{ $json.event_fee }}",
+            "approved_facts": "={{ $json.approved_facts.join(\" | \") }}",
+            "event_status": "={{ $json.event_status }}",
+            "communications_approved": "={{ $json.communications_approved }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "357b05b4-4986-4ce9-bbdc-e799478b1605",
+      "name": "Upsert EVENTS_DB",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 134341779,
+          "mode": "list",
+          "cachedResultName": "EVENT_REGISTRATIONS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=134341779"
+        },
+        "options": {}
+      },
+      "id": "b1ca705f-511c-4c10-bdb0-7425c5c24580",
+      "name": "Read EVENT_REGISTRATIONS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1360,
+        304
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ev = $('Validate Event Payload').first().json;\nconst rows = $input.all().map(function(i){ return i.json; }).filter(function(r){ return r && r.event_id === ev.event_id && String(r.status || '').toUpperCase() === 'REGISTERED'; });\nconst registered_count = rows.length;\nconst capacity = Number(ev.event_capacity) || 0;\nconst remaining_capacity = Math.max(capacity - registered_count, 0);\nconst capacity_reached = capacity > 0 && registered_count >= capacity;\nlet campaign_gate = 'PROCEED';\nlet stop_reason = '';\nif (String(ev.event_status || '').toUpperCase() !== 'OPEN') { campaign_gate = 'STOP'; stop_reason = 'EVENT_CLOSED'; }\nelse if (ev.communications_approved !== true) { campaign_gate = 'STOP'; stop_reason = 'COMMUNICATIONS_NOT_APPROVED'; }\nelse if (capacity_reached) { campaign_gate = 'STOP'; stop_reason = 'CAPACITY_REACHED'; }\nconst invite_budget = Math.max(Math.min(Number(ev.max_invitations) || 0, remaining_capacity), 0);\nreturn [{ json: Object.assign({}, ev, { registered_count: registered_count, remaining_capacity: remaining_capacity, capacity_reached: capacity_reached, invite_budget: invite_budget, campaign_gate: campaign_gate, stop_reason: stop_reason }) }];"
+      },
+      "id": "a295becd-9aa9-4196-abcf-22fa92a55c48",
+      "name": "Compute Capacity Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "mba25kamisetti@iimk.ac.in",
+        "subject": "=[AlumniMatch] Event form incomplete - {{ $json.event_id }}",
+        "emailType": "text",
+        "message": "=Event intake failed validation, so no alumni were contacted.\n\nEvent ID: {{ $json.event_id }}\nMissing fields: {{ $json.missing_fields.join(\", \") }}\nRun ID: {{ $json.run_id }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "eeec6e14-b116-45bf-9e70-e6d6314d9c46",
+      "name": "Notify Alumni Team - Invalid Event",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        624
+      ],
+      "webhookId": "b0da7fad-48ab-4a28-a4b0-d00082414fa9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HueunVHcYvfwE7DI",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.campaign_gate }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "PROCEED"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Campaign Stopped"
+        }
+      },
+      "id": "1412b56a-ddac-41d7-b940-c7db8552d58d",
+      "name": "Campaign Policy Gate",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1808,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "<__PLACEHOLDER_VALUE__Alumni Office ops inbox, e.g. alumni.ops@example.com__>",
+        "subject": "=[AlumniMatch] Campaign stopped - {{ $json.stop_reason }}",
+        "emailType": "text",
+        "message": "=The campaign for {{ $json.event_name }} was stopped by a rule before any alumni were contacted.\n\nReason: {{ $json.stop_reason }}\nRegistered: {{ $json.registered_count }} / {{ $json.event_capacity }}\n\nNo AI ran and no emails were drafted.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "36e85054-02c0-4e19-a06d-24cb7beb7b4f",
+      "name": "Notify Alumni Team - Campaign Stopped",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        624
+      ],
+      "webhookId": "6eb6275b-f27f-4ac9-afcd-2fc3cfa47a95",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HueunVHcYvfwE7DI",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 799061685,
+          "mode": "list",
+          "cachedResultName": "ALUMNI_CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=799061685"
+        },
+        "options": {}
+      },
+      "id": "41896085-8c94-4097-953c-df343f2a6865",
+      "name": "Read ALUMNI_CRM",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2240,
+        160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const ev = $('Compute Capacity Status').first().json;\nconst now = Date.now();\nfunction lc(v){ return String(v == null ? '' : v).toLowerCase().trim(); }\nfunction truthy(v){ return v === true || ['true','yes','y','1'].indexOf(String(v).trim().toLowerCase()) >= 0; }\nconst targetCities = (ev.target_cities || []).map(lc);\nconst bFrom = Number(ev.batch_from) || 0;\nconst bTo = Number(ev.batch_to) || 0;\nconst out = [];\n$input.all().forEach(function(item){\n  const a = item.json;\n  if (!a || !a.alumni_id) { return; }\n  let status = 'ELIGIBLE';\n  let reason = '';\n  const pref = lc(a.communication_preference);\n  const d = a.last_email_sent_at ? new Date(a.last_email_sent_at) : null;\n  const days = (d && !isNaN(d.getTime())) ? Math.floor((now - d.getTime()) / 86400000) : 9999;\n  const prefAllowsEmail = !pref || pref.indexOf('email') >= 0 || pref === 'any' || pref === 'all';\n  const year = Number(a.graduation_year) || 0;\n  if (!truthy(a.email_consent)) { status = 'EXCLUDED'; reason = 'NO_CONSENT'; }\n  else if (truthy(a.unsubscribed)) { status = 'EXCLUDED'; reason = 'UNSUBSCRIBED'; }\n  else if (!prefAllowsEmail) { status = 'EXCLUDED'; reason = 'COMMUNICATION_PREFERENCE'; }\n  else if (days < 21) { status = 'EXCLUDED'; reason = 'RECENTLY_CONTACTED'; }\n  else if (targetCities.length && targetCities.indexOf(lc(a.city)) < 0) { status = 'EXCLUDED'; reason = 'CITY_NOT_TARGETED'; }\n  else if (bFrom && year && year < bFrom) { status = 'EXCLUDED'; reason = 'BATCH_NOT_TARGETED'; }\n  else if (bTo && year && year > bTo) { status = 'EXCLUDED'; reason = 'BATCH_NOT_TARGETED'; }\n  if (status !== 'ELIGIBLE') { return; }\n  out.push({ json: Object.assign({}, a, {\n    event_id: ev.event_id,\n    eligibility_status: status,\n    exclusion_reason: reason,\n    days_since_last_email: days,\n    decided_by: 'DETERMINISTIC_RULES'\n  }) });\n});\nreturn out;"
+      },
+      "id": "9720a3a9-e0bd-4ab8-b11e-f825d416610d",
+      "name": "Apply Hard Eligibility Rules",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ev = $('Compute Capacity Status').first().json;\nfunction lc(v){ return String(v == null ? '' : v).toLowerCase().trim(); }\nfunction toList(v){ if (Array.isArray(v)) return v.map(lc).filter(Boolean); return lc(v).split(/[;,|]/).map(function(s){ return s.trim(); }).filter(Boolean); }\nfunction words(s){ return lc(s).split(/[^a-z0-9]+/).filter(function(w){ return w.length > 3; }); }\nfunction related(a, b){ const wa = words(a); const wb = words(b); return wa.some(function(w){ return wb.indexOf(w) >= 0; }); }\nfunction near(v, list){ const x = lc(v); if (!x) return false; return list.some(function(t){ return t.indexOf(x) >= 0 || x.indexOf(t) >= 0 || related(t, x); }); }\nfunction stageIdx(s){ const x = lc(s); if (!x) return -1; if (x.indexOf('early') >= 0 || x.indexOf('junior') >= 0 || x.indexOf('analyst') >= 0 || x.indexOf('associate') >= 0) return 0; if (x.indexOf('mid') >= 0 || x.indexOf('manager') >= 0) return 1; if (x.indexOf('senior') >= 0 || x.indexOf('director') >= 0 || x.indexOf('principal') >= 0) return 2; if (x.indexOf('lead') >= 0 || x.indexOf('chief') >= 0 || x.indexOf('head') >= 0 || x.indexOf('partner') >= 0 || x.indexOf('founder') >= 0) return 3; return -1; }\nconst tInd = toList(ev.target_industries);\nconst tFn = toList(ev.target_functions);\nconst tStageIdx = toList(ev.target_career_stages).map(stageIdx).filter(function(i){ return i >= 0; });\nconst topic = lc(ev.event_topic);\nconst scored = [];\n$input.all().forEach(function(item){\n  const a = item.json;\n  const matched = [];\n  const unmatched = [];\n  const gaps = [];\n  let industry = 0;\n  const ind = lc(a.industry);\n  if (!ind) { gaps.push('industry'); unmatched.push('Industry missing from profile'); }\n  else if (tInd.indexOf(ind) >= 0) { industry = 25; matched.push('Target industry match: ' + a.industry); }\n  else if (near(ind, tInd)) { industry = 12; matched.push('Adjacent industry: ' + a.industry); }\n  else { unmatched.push('Industry outside target list: ' + a.industry); }\n  let interest = 0;\n  const ints = toList(a.interests);\n  const pastTopics = toList(a.past_event_topics);\n  if (!ints.length) { gaps.push('interests'); unmatched.push('No stated interests on file'); }\n  else if (ints.indexOf(topic) >= 0) { interest = 20; matched.push('Stated interest in ' + ev.event_topic); }\n  else if (near(topic, ints) || near(topic, pastTopics)) { interest = 10; matched.push('Related interest or past topic overlap'); }\n  else { unmatched.push('No interest overlap with ' + ev.event_topic); }\n  let location = 0;\n  const city = lc(a.city);\n  if (!city) { gaps.push('city'); unmatched.push('City missing from profile'); }\n  else if (city === lc(ev.city)) { location = 20; matched.push('Same city as venue: ' + a.city); }\n  else if (lc(a.country) === lc(ev.country)) { location = 8; matched.push('Same country, different city (' + a.city + ') - travel required'); }\n  else { unmatched.push('Different country (' + (a.country || 'unknown') + ') - significant travel'); }\n  let stage = 0;\n  const si = stageIdx(a.seniority);\n  if (si < 0) { gaps.push('seniority'); unmatched.push('Career stage unknown'); }\n  else if (tStageIdx.indexOf(si) >= 0) { stage = 15; matched.push('Target career stage: ' + a.seniority); }\n  else if (tStageIdx.some(function(t){ return Math.abs(t - si) === 1; })) { stage = 8; matched.push('Adjacent career stage: ' + a.seniority); }\n  else { unmatched.push('Career stage outside target: ' + a.seniority); }\n  let engagement = 0;\n  const pc = Number(a.past_event_count) || 0;\n  if (pc >= 3) { engagement = 10; matched.push('Attended ' + pc + ' previous alumni events'); }\n  else if (pc >= 1) { engagement = 5; matched.push('Attended ' + pc + ' previous alumni event(s)'); }\n  else { unmatched.push('No prior event attendance recorded'); }\n  let func = 0;\n  const fn = lc(a['function']);\n  if (!fn) { gaps.push('function'); unmatched.push('Function missing from profile'); }\n  else if (tFn.indexOf(fn) >= 0) { func = 10; matched.push('Target function match: ' + a['function']); }\n  else if (near(fn, tFn)) { func = 5; matched.push('Related function: ' + a['function']); }\n  else { unmatched.push('Function outside target: ' + a['function']); }\n  const score = industry + interest + location + stage + engagement + func;\n  const band = score >= 80 ? 'HIGH' : (score >= 60 ? 'MEDIUM' : (score >= 40 ? 'LOW' : 'SUPPRESS'));\n  const travel = (city && city === lc(ev.city)) ? 'LOCAL' : (lc(a.country) === lc(ev.country) ? 'DOMESTIC_TRAVEL' : 'INTERNATIONAL_TRAVEL');\n  scored.push(Object.assign({}, a, {\n    relevance_score: score,\n    relevance_band: band,\n    score_breakdown: { industry_match: industry, interest_topic_match: interest, location_match: location, career_stage: stage, past_engagement: engagement, function_match: func },\n    matched_signals: matched,\n    unmatched_signals: unmatched,\n    profile_gaps: gaps,\n    travel_situation: travel,\n    scoring_model: 'relevance-v1.0 (25/20/20/15/10/10)',\n    scored_by: 'DETERMINISTIC_ENGINE'\n  }));\n});\nconst qualified = scored.filter(function(a){ return a.relevance_score >= 60; })\n  .sort(function(x, y){ return y.relevance_score - x.relevance_score; });\n\nif (!qualified.length) {\n  const bestScore = scored.length ? Math.max.apply(null, scored.map(function(a){ return a.relevance_score; })) : 0;\n  const topCandidates = scored.slice().sort(function(x, y){ return y.relevance_score - x.relevance_score; }).slice(0, 5)\n    .map(function(a){ return (a.first_name || a.alumni_id) + ' (' + a.alumni_id + ') - score ' + a.relevance_score + '/100, ' + a.relevance_band; });\n  return [{ json: {\n    no_candidates: true,\n    event_id: ev.event_id,\n    event_name: ev.event_name,\n    event_city: ev.city,\n    eligible_count: scored.length,\n    best_score: bestScore,\n    threshold: 60,\n    top_candidates: topCandidates.length ? topCandidates : ['No alumni passed the hard eligibility rules at all.']\n  } }];\n}\n\nconst budget = Number(ev.invite_budget) || 0;\nreturn qualified.map(function(a, idx){\n  const queueStatus = idx < budget ? 'INVITED' : 'WAITLIST';\n  return { json: Object.assign({}, a, {\n    no_candidates: false,\n    queue_status: queueStatus,\n    queue_id: ev.event_id + '-' + a.alumni_id,\n    ai_input: {\n      alumni: { alumni_id: a.alumni_id, first_name: a.first_name || '', city: a.city || '', country: a.country || '', graduation_year: a.graduation_year || '', industry: a.industry || '', job_function: a['function'] || '', seniority: a.seniority || '', interests: a.interests || '', past_event_count: Number(a.past_event_count) || 0, past_event_topics: a.past_event_topics || '', chapter: a.chapter || '', profile_gaps: a.profile_gaps },\n      event: { event_id: ev.event_id, event_name: ev.event_name, event_description: ev.event_description, event_date: ev.event_date, event_time: ev.event_time || '', city: ev.city, venue: ev.venue || '', country: ev.country, event_topic: ev.event_topic, event_fee: ev.event_fee || '', registration_url: ev.registration_url, approved_facts: ev.approved_facts, approved_speakers: ev.approved_speakers },\n      deterministic_scoring: { relevance_score: a.relevance_score, relevance_band: a.relevance_band, score_breakdown: a.score_breakdown, matched_signals: a.matched_signals, unmatched_signals: a.unmatched_signals, travel_situation: a.travel_situation }\n    }\n  }) };\n});"
+      },
+      "id": "f699242a-5e72-4d63-bc91-a6a8f766100a",
+      "name": "Score Event Relevance",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4",
+          "mode": "list",
+          "cachedResultName": "gpt-4"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "94c663f8-15dc-4814-9c61-051fafe0714a",
+      "name": "Personalization LLM",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3376,
+        512
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "wPjXtS33yztxnrIk",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"alumni_id\":\"ALU001\",\"event_id\":\"EVT001\",\"relevance_score\":88,\"relevance_band\":\"HIGH\",\"relevance_reason\":\"Mumbai-based BFSI professional matching the target profile\",\"personalization_angle\":\"Local BFSI peer discussion relevant to current role\",\"personalization_confidence\":0.86,\"travel_context\":\"Event is in the alumnus home city\",\"recommended_tone\":\"Warm, professional, concise\",\"email_subject\":\"Invitation: BFSI Leadership Roundtable in Mumbai\",\"email_body\":\"Dear Rahul, ...\",\"claims_used\":[\"Event takes place in Mumbai\"],\"risk_flags\":[],\"requires_human_review\":true}"
+      },
+      "id": "54b9bb8f-a6f1-4212-bea8-72008e21fa92",
+      "name": "Personalization Output Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3552,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=ALUMNI_EVENT_PERSONALIZATION_REQUEST\n{{ JSON.stringify($json.ai_input) }}\n\nReturn ONLY the required JSON object. Echo alumni_id and event_id exactly as supplied.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an Alumni Engagement Personalization Agent for a business school Alumni Office.\n\nYou are given one alumnus, one event, and a deterministic relevance score that was already calculated. Your job is to answer two questions and then write the letter.\n\n1. Is this event genuinely worth this person's evening?\n2. If yes, what is the honest reason for them to say yes?\n\nGround every word in the input. Use ONLY the information supplied.\n\nNever invent: alumni achievements, interests, relationships, professional history, past attendance, event speakers, event facts, testimonials, or employer information.\n\nNever infer or refer to religion, caste, ethnicity, political affiliation, health, financial condition, sexual orientation, or family or marital status.\n\nEvery factual claim about the event must be supported by an entry in approved_facts, and each fact you use must be listed in claims_used. You may not invent a keynote speaker or a detail to make the email more exciting.\n\nBe honest about travel. If travel_situation is DOMESTIC_TRAVEL or INTERNATIONAL_TRAVEL, acknowledge that they would be travelling. Do not imply the event is local when it is not.\n\nIf profile_gaps is large or the profile tells you almost nothing, do NOT invent a reason. Set personalization_confidence below 0.6, say plainly in relevance_reason that you cannot personalise this well, and write conservative event-focused copy so a human can decide.\n\nDo not treat the relevance score as a prediction of attendance. It only decides who gets considered first.\n\nDo not pressure or manipulate. No false scarcity, no guilt, no flattery you were not given evidence for.\n\nAlways keep requires_human_review set to true. A person approves every message before it sends.\n\nReturn ONLY the required structured JSON."
+            }
+          ]
+        },
+        "batching": {
+          "batchSize": 3,
+          "delayBetweenBatches": 500
+        }
+      },
+      "id": "8ce5256b-ff78-4c98-958e-4e085f8c93ef",
+      "name": "AI Personalization Agent",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        3408,
+        96
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pool = {};\n$('Ready for AI Personalization').all().forEach(function(i){ pool[i.json.alumni_id] = i.json; });\nconst out = [];\n$input.all().forEach(function(item){\n  const ai = (item.json && item.json.output) ? item.json.output : item.json;\n  const base = pool[ai.alumni_id];\n  const flags = Array.isArray(ai.risk_flags) ? ai.risk_flags.slice() : [];\n  let conf = Number(ai.personalization_confidence);\n  if (isNaN(conf)) { conf = 0; }\n  if (!base) { flags.push('AI_BINDING_ERROR'); conf = 0; }\n  const claims = Array.isArray(ai.claims_used) ? ai.claims_used : [];\n  const approved = (base && base.ai_input) ? base.ai_input.event.approved_facts : [];\n  const unapproved = claims.filter(function(c){ return approved.indexOf(c) < 0; });\n  if (unapproved.length) { flags.push('CLAIM_NOT_IN_APPROVED_FACTS'); }\n  out.push({ json: Object.assign({}, base || {}, {\n    ai_returned_alumni_id: ai.alumni_id || '',\n    relevance_reason: ai.relevance_reason || '',\n    personalization_angle: ai.personalization_angle || '',\n    personalization_confidence: conf,\n    travel_context: ai.travel_context || '',\n    recommended_tone: ai.recommended_tone || '',\n    email_subject: ai.email_subject || '',\n    email_body: ai.email_body || '',\n    claims_used: claims,\n    unapproved_claims: unapproved,\n    risk_flags: flags,\n    requires_human_review: true,\n    ai_status: 'OK',\n    personalization_source: 'AI_AGENT'\n  }) });\n});\nreturn out;"
+      },
+      "id": "e45d5d3f-286c-4518-9bb1-aa3d344082e3",
+      "name": "Normalize Personalization Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3776,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\n$input.all().forEach(function(item){\n  const a = item.json;\n  const ev = (a.ai_input && a.ai_input.event) ? a.ai_input.event : {};\n  const facts = Array.isArray(ev.approved_facts) ? ev.approved_facts : [];\n  const subject = 'Invitation: ' + ev.event_name + ' - ' + ev.city;\n  const body = 'Dear ' + (a.first_name || 'Alumnus') + ',\\n\\nThe Alumni Office is hosting ' + ev.event_name + ' in ' + ev.city + ' on ' + ev.event_date + '.\\n\\n' + facts.join('\\n') + '\\n\\nRegistration: ' + ev.registration_url + '\\n\\nIf you would prefer not to receive event invitations, you can opt out using the link at the end of this email.\\n\\nAlumni Relations Office';\n  out.push({ json: Object.assign({}, a, {\n    relevance_reason: 'AI personalization unavailable - deterministic score retained',\n    personalization_angle: 'Conservative event-focused invitation (no personalization)',\n    personalization_confidence: 0,\n    travel_context: a.travel_situation || '',\n    recommended_tone: 'Neutral, factual',\n    email_subject: subject,\n    email_body: body,\n    claims_used: facts,\n    unapproved_claims: [],\n    risk_flags: ['AI_PERSONALIZATION_FAILURE'],\n    requires_human_review: true,\n    ai_status: 'AI_FAILURE',\n    personalization_source: 'FALLBACK_TEMPLATE'\n  }) });\n});\nreturn out;"
+      },
+      "id": "ef3b8fe6-834f-4ce1-8ca4-c0c2e4e6ae9f",
+      "name": "AI Fallback - Conservative Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3824,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }\nconst out = [];\n$input.all().forEach(function(item){\n  const a = item.json;\n  const band = a.relevance_band === 'HIGH' ? 'HIGH' : 'MEDIUM';\n  const bandBg = band === 'HIGH' ? '#fff1f0' : '#eef2ff';\n  const bandColor = band === 'HIGH' ? '#b91c1c' : '#3730a3';\n  const gradStart = band === 'HIGH' ? '#f59e0b' : '#6366f1';\n  const gradEnd = band === 'HIGH' ? '#ef4444' : '#06b6d4';\n  const initials = (a.first_name || a.alumni_id || 'AL').trim().slice(0, 2).toUpperCase();\n  const confPct = Math.round((Number(a.personalization_confidence) || 0) * 100);\n  const copyModeLabel = a.copy_mode === 'PERSONALIZED' ? 'AI Personalized' : 'Approved Template';\n  const pills = (a.matched_signals || []).slice(0, 6).map(function(s){\n    return '<span style=\"display:inline-block;background:#ecfdf5;color:#065f46;font-size:12px;border-radius:999px;padding:5px 12px;margin:0 6px 6px 0;\">' + esc(s) + '</span>';\n  }).join('');\n  const html = '<div style=\"font-family:\\'Segoe UI\\',Arial,sans-serif;max-width:640px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">' +\n    '<div style=\"background:linear-gradient(135deg,' + gradStart + ',' + gradEnd + ');padding:32px 28px;text-align:center;\">' +\n      '<div style=\"width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.25);color:#fff;font-weight:700;font-size:18px;line-height:52px;margin:0 auto 12px;\">' + esc(initials) + '</div>' +\n      '<div style=\"color:#fde9d9;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.95;\">AlumniMatch &middot; Approval Required</div>' +\n      '<div style=\"color:#fff;font-size:20px;font-weight:700;margin-top:4px;\">' + esc(a.first_name) + ' (' + esc(a.alumni_id) + ')</div>' +\n      '<div style=\"color:#fff;font-size:15px;margin-top:2px;opacity:0.95;\">' + esc(a.event_name) + '</div>' +\n    '</div>' +\n    '<div style=\"padding:24px 26px;\">' +\n      '<div style=\"background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:20px;\"><b>Reviewer note:</b> ' + esc(a.review_reason) + '</div>' +\n      '<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr>' +\n        '<td width=\"33%\" style=\"padding-right:8px;\"><div style=\"background:' + bandBg + ';border-radius:10px;padding:14px;text-align:center;\">' +\n          '<div style=\"font-size:20px;font-weight:800;color:' + bandColor + ';\">' + esc(a.relevance_score) + '/100</div>' +\n          '<div style=\"font-size:10px;text-transform:uppercase;color:' + bandColor + ';letter-spacing:0.5px;\">' + esc(band) + '</div>' +\n        '</div></td>' +\n        '<td width=\"33%\" style=\"padding:0 4px;\"><div style=\"background:#eef2ff;border-radius:10px;padding:14px;text-align:center;\">' +\n          '<div style=\"font-size:20px;font-weight:800;color:#4338ca;\">' + confPct + '%</div>' +\n          '<div style=\"font-size:10px;text-transform:uppercase;color:#4338ca;letter-spacing:0.5px;\">CONFIDENCE</div>' +\n        '</div></td>' +\n        '<td width=\"33%\" style=\"padding-left:8px;\"><div style=\"background:#f1f5f9;border-radius:10px;padding:14px;text-align:center;\">' +\n          '<div style=\"font-size:13px;font-weight:700;color:#334155;\">' + esc(copyModeLabel) + '</div>' +\n          '<div style=\"font-size:10px;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;\">COPY MODE</div>' +\n        '</div></td>' +\n      '</tr></table>' +\n      '<div style=\"margin-top:20px;\"><div style=\"font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;\">Who</div>' +\n        '<div style=\"font-size:14px;color:#111827;\">' + esc(a.city) + ', ' + esc(a.country) + ' &middot; ' + esc(a.travel_situation) + '</div>' +\n        '<div style=\"font-size:14px;color:#111827;\">' + esc(a.industry) + ' / ' + esc(a['function']) + ' / ' + esc(a.seniority) + ' &middot; Batch ' + esc(a.graduation_year) + '</div>' +\n      '</div>' +\n      '<div style=\"margin-top:16px;\"><div style=\"font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;\">Matched signals</div>' + (pills || '<span style=\"font-size:13px;color:#9ca3af;\">None</span>') + '</div>' +\n      '<div style=\"margin-top:16px;\"><div style=\"font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;\">AI reasoning</div>' +\n        '<div style=\"font-size:14px;color:#374151;line-height:1.5;\">' + esc(a.relevance_reason) + '</div>' +\n        '<div style=\"font-size:13px;color:#6b7280;margin-top:4px;\">Angle: ' + esc(a.personalization_angle) + '</div>' +\n        '<div style=\"font-size:13px;color:#6b7280;\">Facts used: ' + esc((a.claims_used || []).join('; ')) + '</div>' +\n      '</div>' +\n      '<div style=\"margin-top:18px;font-size:12px;color:#9ca3af;font-style:italic;\">Click Review &amp; Respond below to see the exact subject and body, edit if needed, and record your decision.</div>' +\n    '</div>' +\n  '</div>';\n  out.push({ json: Object.assign({}, a, { approval_html: html }) });\n});\nreturn out;"
+      },
+      "id": "c42282cf-064e-4453-acd1-29b267b31647",
+      "name": "Build Approval Packet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5904,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('Build Approval Packet').all();\nconst out = [];\n$input.all().forEach(function(item, i){\n  const a = src[i] ? src[i].json : {};\n  const d = (item.json && item.json.data) ? item.json.data : (item.json || {});\n  function pick(obj, names){ for (var k = 0; k < names.length; k++) { const v = obj[names[k]]; if (v !== undefined && v !== null && v !== '') { return v; } } return undefined; }\n  const decisionRaw = pick(d, ['Decision', 'decision']);\n  const subjectRaw = pick(d, ['Subject', 'subject']);\n  const bodyRaw = pick(d, ['Email Body', 'Email_Body', 'email_body', 'emailBody']);\n  const approved = String(decisionRaw || '').trim().toLowerCase() === 'approve';\n  const finalSubject = (subjectRaw !== undefined && subjectRaw !== '') ? subjectRaw : a.email_subject;\n  const finalBody = (bodyRaw !== undefined && bodyRaw !== '') ? bodyRaw : a.email_body;\n  const wasEdited = (finalSubject !== a.email_subject) || (finalBody !== a.email_body);\n  out.push({ json: Object.assign({}, a, {\n    approval_status: approved ? 'APPROVED' : 'REJECTED',\n    approved_by: 'ALUMNI_RELATIONS_MANAGER',\n    approval_decided_at: new Date().toISOString(),\n    human_approved: approved,\n    email_subject: finalSubject,\n    email_body: finalBody,\n    manager_edited: wasEdited\n  }) });\n});\nreturn out;"
+      },
+      "id": "bd6d41e4-d39f-4af7-b431-f427dc4f6207",
+      "name": "Resolve Approval Decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6352,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.human_approved }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "bcc9fba8-a45a-49c9-9754-5202e13149aa",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6560,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.email_subject }}",
+        "message": "={{ $json.email_html }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Alumni Relations Office"
+        }
+      },
+      "id": "59a32d13-e02c-47c7-9d37-202fc143ed09",
+      "name": "Send Personalized Invitation",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        6784,
+        80
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "webhookId": "39a4d89e-11c8-4817-9f69-20639b6df4db",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HueunVHcYvfwE7DI",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const src = $('Resolve Approval Decision').all().filter(function(i){ return i.json.human_approved === true; });\nconst out = [];\n$input.all().forEach(function(item, i){\n  const a = src[i] ? src[i].json : {};\n  const failed = !!(item.json && item.json.error);\n  const editedNote = a.manager_edited ? ' Manager edited the copy before approving.' : '';\n  out.push({ json: {\n    log_id: 'LOG-' + $execution.id + '-' + (a.alumni_id || i),\n    timestamp: new Date().toISOString(),\n    alumni_id: a.alumni_id,\n    event_id: a.event_id,\n    action: failed ? 'SEND_FAILED' : 'INVITATION_SENT',\n    relevance_score: a.relevance_score,\n    relevance_band: a.relevance_band,\n    personalization_confidence: a.personalization_confidence,\n    personalization_angle: a.personalization_angle,\n    message_status: failed ? 'SEND_FAILED_AFTER_RETRIES' : 'SENT',\n    approval_status: 'APPROVED',\n    risk_flags: (a.risk_flags || []).join('; '),\n    api_status: failed ? 'FAILED' : 'OK',\n    notes: (failed ? 'Approved message could not be delivered after 3 attempts - manual follow-up required.' : ('Sent via ' + a.copy_mode + '. Angle: ' + (a.personalization_angle || ''))) + editedNote,\n    _last_email_sent_at: failed ? (a.last_email_sent_at || '') : new Date().toISOString(),\n    _engagement_score: a.engagement_score\n  } });\n});\nreturn out;"
+      },
+      "id": "d74eb45e-e9f4-402b-8710-287071c3cbb3",
+      "name": "Compose Sent Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7008,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2115427640,
+          "mode": "list",
+          "cachedResultName": "ENGAGEMENT_LOG",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=2115427640"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "log_id",
+              "displayName": "log_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alumni_id",
+              "displayName": "alumni_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relevance_score",
+              "displayName": "relevance_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relevance_band",
+              "displayName": "relevance_band",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "personalization_confidence",
+              "displayName": "personalization_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "personalization_angle",
+              "displayName": "personalization_angle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message_status",
+              "displayName": "message_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approval_status",
+              "displayName": "approval_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "api_status",
+              "displayName": "api_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "463ba14d-34e6-4ee1-8cca-67fa1d662be1",
+      "name": "Append Sent Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        7232,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 799061685,
+          "mode": "list",
+          "cachedResultName": "ALUMNI_CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=799061685"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "alumni_id"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": true,
+              "display": true,
+              "displayName": "alumni_id",
+              "id": "alumni_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "last_email_sent_at",
+              "id": "last_email_sent_at",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "engagement_score",
+              "id": "engagement_score",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "alumni_id": "={{ $json.alumni_id }}",
+            "engagement_score": "={{ (Number($json._engagement_score) || 0) + 1 }}",
+            "last_email_sent_at": "={{ $json._last_email_sent_at }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "05b0ddca-8ae5-4ec8-b83d-3383f7922c9c",
+      "name": "Update ALUMNI_CRM After Send",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        7440,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\n$input.all().forEach(function(item, i){\n  const a = item.json;\n  out.push({ json: {\n    log_id: 'LOG-' + $execution.id + '-' + (a.alumni_id || i) + '-REJ',\n    timestamp: new Date().toISOString(),\n    alumni_id: a.alumni_id,\n    event_id: a.event_id,\n    action: 'HUMAN_REJECTED',\n    relevance_score: a.relevance_score,\n    relevance_band: a.relevance_band,\n    personalization_confidence: a.personalization_confidence,\n    personalization_angle: a.personalization_angle,\n    message_status: 'NOT_SENT',\n    approval_status: 'REJECTED',\n    risk_flags: (a.risk_flags || []).join('; '),\n    api_status: 'N/A',\n    notes: 'Alumni Relations Manager rejected this draft. Nothing was sent. Reviewer note was: ' + (a.review_reason || ''),\n    _last_email_sent_at: a.last_email_sent_at || '',\n    _engagement_score: a.engagement_score\n  } });\n});\nreturn out;"
+      },
+      "id": "6e090aea-1382-433f-b852-4eebd0b05bdb",
+      "name": "Compose Rejection Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6784,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "path": "alumni-rsvp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "344b25d1-e5c0-4f68-9c91-1cbdce7af562",
+      "name": "RSVP / Response Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        1216
+      ],
+      "webhookId": "3c5daa53-1bd7-484f-b511-ee20d680f185"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "alumni_id",
+              "type": "string",
+              "value": "={{ $json.query?.alumni_id ?? $json.body?.alumni_id ?? \"\" }}"
+            },
+            {
+              "id": "r2",
+              "name": "event_id",
+              "type": "string",
+              "value": "={{ $json.query?.event_id ?? $json.body?.event_id ?? \"\" }}"
+            },
+            {
+              "id": "r3",
+              "name": "action",
+              "type": "string",
+              "value": "={{ ($json.query?.action ?? $json.body?.action ?? \"\").toUpperCase() }}"
+            },
+            {
+              "id": "r4",
+              "name": "received_at",
+              "type": "string",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5ef68ba3-5839-47b2-852b-45985108f298",
+      "name": "Normalize RSVP Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -368,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "RSVP_YES"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "RSVP_NO"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                }
+              }
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "operator": {
+                      "operation": "equals",
+                      "type": "string"
+                    },
+                    "rightValue": "UNSUBSCRIBE"
+                  }
+                ],
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                }
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Invalid Action"
+        }
+      },
+      "id": "02aae65b-7c3a-4df2-8423-d7eb351fdf56",
+      "name": "RSVP Action Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "EVENTS_DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "event_id",
+              "lookupValue": "={{ $json.event_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5c629d51-f049-4c97-9099-2c2a163b2966",
+      "name": "Read EVENTS_DB Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        1008
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 134341779,
+          "mode": "list",
+          "cachedResultName": "EVENT_REGISTRATIONS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=134341779"
+        },
+        "options": {}
+      },
+      "id": "8e7a5974-ded8-49cd-bb7e-f182570650f0",
+      "name": "Read Registrations for RSVP",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        1008
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const req = $('Normalize RSVP Payload').first().json;\nconst alum = $('Read Alumnus for RSVP').first().json;\nconst ev = $('Read EVENTS_DB Row').first().json;\nconst rows = $input.all().map(function(i){ return i.json; }).filter(function(r){ return r && r.event_id === req.event_id; });\nconst registered = rows.filter(function(r){ return String(r.status || '').toUpperCase() === 'REGISTERED'; }).length;\nconst capacity = Number(ev.event_capacity) || 0;\nconst existing = rows.filter(function(r){ return r.alumni_id === req.alumni_id; })[0];\nconst status = (capacity > 0 && registered >= capacity) ? 'WAITLISTED' : 'REGISTERED';\nreturn [{ json: {\n  registration_id: existing ? existing.registration_id : ('REG-' + req.event_id + '-' + req.alumni_id),\n  event_id: req.event_id,\n  alumni_id: req.alumni_id,\n  email: alum.email || '',\n  status: status,\n  registered_at: req.received_at,\n  attendance_status: 'PENDING',\n  thank_you_sent: 'FALSE',\n  registered_count: registered,\n  event_capacity: capacity,\n  remaining_capacity: Math.max(capacity - registered, 0),\n  rsvp_action: 'RSVP_YES',\n  decision_note: status === 'WAITLISTED' ? ('Capacity ' + capacity + ' already reached with ' + registered + ' registrations - waitlisted deterministically') : ('Seat confirmed - ' + registered + ' of ' + capacity + ' filled before this RSVP')\n} }];"
+      },
+      "id": "c090ec79-e7e0-4458-90b2-0a8ccfa47e0a",
+      "name": "Evaluate RSVP Capacity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const req = $input.first().json;\nconst alum = $('Read Alumnus for RSVP').first().json;\nreturn [{ json: {\n  registration_id: 'REG-' + req.event_id + '-' + req.alumni_id,\n  event_id: req.event_id,\n  alumni_id: req.alumni_id,\n  email: alum.email || '',\n  status: 'DECLINED',\n  registered_at: req.received_at,\n  attendance_status: 'NOT_ATTENDING',\n  thank_you_sent: 'FALSE',\n  registered_count: '',\n  event_capacity: '',\n  remaining_capacity: '',\n  rsvp_action: 'RSVP_NO',\n  decision_note: 'Alumnus declined the invitation'\n} }];"
+      },
+      "id": "644d4bb1-8c8a-4dc0-bce9-3e03a63cd928",
+      "name": "Build Decline Record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 134341779,
+          "mode": "list",
+          "cachedResultName": "EVENT_REGISTRATIONS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=134341779"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "registration_id"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": true,
+              "display": true,
+              "displayName": "registration_id",
+              "id": "registration_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "event_id",
+              "id": "event_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "alumni_id",
+              "id": "alumni_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "email",
+              "id": "email",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "registered_at",
+              "id": "registered_at",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "attendance_status",
+              "id": "attendance_status",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "thank_you_sent",
+              "id": "thank_you_sent",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "alumni_id": "={{ $json.alumni_id }}",
+            "attendance_status": "={{ $json.attendance_status }}",
+            "email": "={{ $json.email }}",
+            "event_id": "={{ $json.event_id }}",
+            "registered_at": "={{ $json.registered_at }}",
+            "registration_id": "={{ $json.registration_id }}",
+            "status": "={{ $json.status }}",
+            "thank_you_sent": "={{ $json.thank_you_sent }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "ed58c3d3-df60-4f36-b13f-2359e11ae90b",
+      "name": "Upsert EVENT_REGISTRATIONS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        1104
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 799061685,
+          "mode": "list",
+          "cachedResultName": "ALUMNI_CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=799061685"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "alumni_id"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": true,
+              "display": true,
+              "displayName": "alumni_id",
+              "id": "alumni_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "unsubscribed",
+              "id": "unsubscribed",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "email_consent",
+              "id": "email_consent",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "communication_preference",
+              "id": "communication_preference",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "alumni_id": "={{ $json.alumni_id }}",
+            "communication_preference": "none",
+            "email_consent": "FALSE",
+            "unsubscribed": "TRUE"
+          }
+        },
+        "options": {}
+      },
+      "id": "97776310-6f80-42b5-86e1-5ed03656d8ed",
+      "name": "Update ALUMNI_CRM - Opt Out",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        1392
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const req = $('Normalize RSVP Payload').first().json;\nconst a = $input.first().json;\nconst action = req.action;\nlet note = '';\nif (action === 'UNSUBSCRIBE') { note = 'Opt-out applied immediately: unsubscribed=TRUE, email_consent=FALSE. All future campaigns will exclude this alumnus at the deterministic eligibility stage.'; }\nelse { note = a.decision_note || ''; }\nreturn [{ json: {\n  log_id: 'LOG-' + $execution.id + '-RSVP',\n  timestamp: new Date().toISOString(),\n  alumni_id: req.alumni_id,\n  event_id: req.event_id,\n  action: action,\n  relevance_score: '',\n  relevance_band: '',\n  personalization_confidence: '',\n  personalization_angle: '',\n  message_status: 'RESPONSE_RECEIVED',\n  approval_status: 'N/A',\n  risk_flags: '',\n  api_status: 'OK',\n  notes: note + ' (Response captured via registration link click - real open tracking is not implemented.)',\n  _response_status: a.status || 'OPTED_OUT'\n} }];"
+      },
+      "id": "659e7632-a7fd-4dce-91f0-ed15e6c1683b",
+      "name": "Compose RSVP Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2115427640,
+          "mode": "list",
+          "cachedResultName": "ENGAGEMENT_LOG",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=2115427640"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "log_id",
+              "displayName": "log_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alumni_id",
+              "displayName": "alumni_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relevance_score",
+              "displayName": "relevance_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relevance_band",
+              "displayName": "relevance_band",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "personalization_confidence",
+              "displayName": "personalization_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "personalization_angle",
+              "displayName": "personalization_angle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message_status",
+              "displayName": "message_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approval_status",
+              "displayName": "approval_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "api_status",
+              "displayName": "api_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2cdb3d07-d49f-4172-a3aa-58ec4c510cef",
+      "name": "Append RSVP Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1360,
+        1200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: $json._response_status ?? \"INVALID_ACTION\", alumni_id: $json.alumni_id ?? \"\", event_id: $json.event_id ?? \"\", message: \"AlumniMatch prototype - synthetic data only\" }) }}",
+        "options": {}
+      },
+      "id": "84069e2f-7c2e-4d71-be28-15e3f3b88e69",
+      "name": "Respond to RSVP",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1584,
+        1264
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "9974398c-8c04-479a-a921-8fd00c809442",
+      "name": "Seed Data & Run Test Matrix",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        1952
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\nfunction daysAgo(n){ const d = new Date(today.getTime() - n * 86400000); return d.toISOString().slice(0, 10); }\nconst rows = [\n{ alumni_id: 'ALU001', first_name: 'Rahul', email: 'rahul.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2016, industry: 'Banking', 'function': 'Risk', seniority: 'Senior', interests: 'BFSI, Risk Management, Leadership', past_event_count: 4, past_event_topics: 'BFSI, Fintech', last_event_attended: '2025-11-20', last_email_sent_at: daysAgo(120), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 82 },\n{ alumni_id: 'ALU002', first_name: 'Priya', email: 'priya.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2018, industry: 'Financial Services', 'function': 'Investment', seniority: 'Mid-career', interests: 'BFSI, Private Equity', past_event_count: 2, past_event_topics: 'BFSI', last_event_attended: '2025-06-10', last_email_sent_at: daysAgo(90), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 64 },\n{ alumni_id: 'ALU003', first_name: 'Vikram', email: 'vikram.demo@example.com', city: 'Bengaluru', country: 'India', graduation_year: 2014, industry: 'Insurance', 'function': 'Strategy', seniority: 'Senior', interests: 'Insurance, Strategy', past_event_count: 3, past_event_topics: 'BFSI, Strategy', last_event_attended: '2025-09-02', last_email_sent_at: daysAgo(75), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Bengaluru', engagement_score: 70 },\n{ alumni_id: 'ALU004', first_name: 'Ananya', email: 'ananya.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2019, industry: 'Banking', 'function': 'Finance', seniority: 'Mid-career', interests: 'BFSI', past_event_count: 1, past_event_topics: 'BFSI', last_event_attended: '2025-02-14', last_email_sent_at: daysAgo(200), email_consent: 'FALSE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 30 },\n{ alumni_id: 'ALU005', first_name: 'Karthik', email: 'karthik.demo@example.com', city: 'Chennai', country: 'India', graduation_year: 2013, industry: 'Financial Services', 'function': 'Risk', seniority: 'Leadership', interests: 'BFSI, Governance', past_event_count: 5, past_event_topics: 'BFSI', last_event_attended: '2025-12-01', last_email_sent_at: daysAgo(150), email_consent: 'TRUE', unsubscribed: 'TRUE', communication_preference: 'email', chapter: 'Chennai', engagement_score: 55 },\n{ alumni_id: 'ALU006', first_name: 'Meera', email: 'meera.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2017, industry: 'Banking', 'function': 'Finance', seniority: 'Senior', interests: 'BFSI, Capital Markets', past_event_count: 3, past_event_topics: 'BFSI', last_event_attended: '2026-01-15', last_email_sent_at: daysAgo(5), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 76 },\n{ alumni_id: 'ALU007', first_name: 'Arjun', email: 'arjun.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2015, industry: 'Banking', 'function': 'Finance', seniority: 'Senior', interests: '', past_event_count: 2, past_event_topics: '', last_event_attended: '', last_email_sent_at: daysAgo(60), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 58 },\n{ alumni_id: 'ALU008', first_name: 'Neha', email: 'neha.demo@example.com', city: '', country: 'India', graduation_year: 2020, industry: 'Insurance', 'function': 'Risk', seniority: 'Mid-career', interests: 'BFSI, Actuarial', past_event_count: 1, past_event_topics: 'BFSI', last_event_attended: '2025-08-08', last_email_sent_at: daysAgo(95), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: '', engagement_score: 44 },\n{ alumni_id: 'ALU009', first_name: 'Sameer', email: 'sameer.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2021, industry: '', 'function': '', seniority: '', interests: '', past_event_count: 0, past_event_topics: '', last_event_attended: '', last_email_sent_at: '', email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 12 },\n{ alumni_id: 'ALU010', first_name: 'Divya', email: 'divya.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2012, industry: 'Manufacturing', 'function': 'Operations', seniority: 'Leadership', interests: 'Supply Chain, Sustainability', past_event_count: 4, past_event_topics: 'Operations', last_event_attended: '2025-10-05', last_email_sent_at: daysAgo(110), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 68 },\n{ alumni_id: 'ALU011', first_name: 'Rohan', email: 'rohan.demo@example.com', city: 'Singapore', country: 'Singapore', graduation_year: 2016, industry: 'Banking', 'function': 'Investment', seniority: 'Senior', interests: 'BFSI, Wealth Management', past_event_count: 3, past_event_topics: 'BFSI', last_event_attended: '2025-07-19', last_email_sent_at: daysAgo(140), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Singapore', engagement_score: 72 },\n{ alumni_id: 'ALU012', first_name: 'Tara', email: 'tara.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2022, industry: 'Media', 'function': 'Marketing', seniority: 'Early-career', interests: 'Brand, Content', past_event_count: 0, past_event_topics: '', last_event_attended: '', last_email_sent_at: daysAgo(180), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 20 },\n{ alumni_id: 'ALU013', first_name: 'Imran', email: 'imran.demo@example.com', city: 'Mumbai', country: 'India', graduation_year: 2015, industry: 'Financial Services', 'function': 'Strategy', seniority: 'Senior', interests: 'BFSI, Digital Transformation', past_event_count: 3, past_event_topics: 'BFSI, Digital', last_event_attended: '2025-11-11', last_email_sent_at: daysAgo(85), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Mumbai', engagement_score: 78 },\n{ alumni_id: 'ALU014', first_name: 'Fatima', email: 'fatima.demo@example.com', city: 'Dubai', country: 'United Arab Emirates', graduation_year: 2017, industry: 'Insurance', 'function': 'Finance', seniority: 'Mid-career', interests: 'BFSI', past_event_count: 2, past_event_topics: 'BFSI', last_event_attended: '2025-05-30', last_email_sent_at: daysAgo(160), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'phone', chapter: 'Gulf', engagement_score: 50 },\n{ alumni_id: 'ALU015', first_name: 'Gaurav', email: 'gaurav.demo@example.com', city: 'Pune', country: 'India', graduation_year: 2011, industry: 'Technology', 'function': 'Product', seniority: 'Leadership', interests: 'Fintech, AI', past_event_count: 6, past_event_topics: 'Fintech, AI', last_event_attended: '2026-02-02', last_email_sent_at: daysAgo(100), email_consent: 'TRUE', unsubscribed: 'FALSE', communication_preference: 'email', chapter: 'Pune', engagement_score: 88 }\n];\nreturn rows.map(function(r){ return { json: r }; });"
+      },
+      "id": "199908ad-f133-41b8-a8cf-ea2c47e87989",
+      "name": "Synthetic Alumni Fixtures (15)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        1952
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 799061685,
+          "mode": "list",
+          "cachedResultName": "ALUMNI_CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=799061685"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "alumni_id",
+              "displayName": "alumni_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "country",
+              "displayName": "country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "graduation_year",
+              "displayName": "graduation_year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "function",
+              "displayName": "function",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seniority",
+              "displayName": "seniority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interests",
+              "displayName": "interests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "past_event_count",
+              "displayName": "past_event_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "past_event_topics",
+              "displayName": "past_event_topics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_event_attended",
+              "displayName": "last_event_attended",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_email_sent_at",
+              "displayName": "last_email_sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email_consent",
+              "displayName": "email_consent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "unsubscribed",
+              "displayName": "unsubscribed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "communication_preference",
+              "displayName": "communication_preference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chapter",
+              "displayName": "chapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "engagement_score",
+              "displayName": "engagement_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "56a77219-f9fc-4d33-bbaa-5cf054b88266",
+      "name": "Seed ALUMNI_CRM",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        1760
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ev = { event_id: 'EVT001', event_name: 'BFSI Leadership Roundtable', city: 'Mumbai', country: 'India', event_topic: 'BFSI', target_industries: ['Banking','Financial Services','Insurance'], target_functions: ['Finance','Risk','Investment','Strategy'], target_career_stages: ['Mid-career','Senior'], event_capacity: 100, event_status: 'OPEN', communications_approved: true };\nfunction lc(v){ return String(v == null ? '' : v).toLowerCase().trim(); }\nfunction toList(v){ if (Array.isArray(v)) return v.map(lc).filter(Boolean); return lc(v).split(/[;,|]/).map(function(s){ return s.trim(); }).filter(Boolean); }\nfunction words(s){ return lc(s).split(/[^a-z0-9]+/).filter(function(w){ return w.length > 3; }); }\nfunction related(a, b){ const wa = words(a); const wb = words(b); return wa.some(function(w){ return wb.indexOf(w) >= 0; }); }\nfunction near(v, list){ const x = lc(v); if (!x) return false; return list.some(function(t){ return t.indexOf(x) >= 0 || x.indexOf(t) >= 0 || related(t, x); }); }\nfunction stageIdx(s){ const x = lc(s); if (!x) return -1; if (x.indexOf('early') >= 0) return 0; if (x.indexOf('mid') >= 0) return 1; if (x.indexOf('senior') >= 0) return 2; if (x.indexOf('lead') >= 0) return 3; return -1; }\nconst tInd = toList(ev.target_industries);\nconst tFn = toList(ev.target_functions);\nconst tStage = toList(ev.target_career_stages).map(stageIdx).filter(function(i){ return i >= 0; });\nconst topic = lc(ev.event_topic);\nfunction truthy(v){ return v === true || ['true','yes','y','1'].indexOf(String(v).trim().toLowerCase()) >= 0; }\nconst now = Date.now();\nfunction evaluate(a){\n  let status = 'ELIGIBLE'; let reason = '';\n  const pref = lc(a.communication_preference);\n  const d = a.last_email_sent_at ? new Date(a.last_email_sent_at) : null;\n  const days = (d && !isNaN(d.getTime())) ? Math.floor((now - d.getTime()) / 86400000) : 9999;\n  const ok = !pref || pref.indexOf('email') >= 0 || pref === 'any';\n  if (!truthy(a.email_consent)) { status = 'EXCLUDED'; reason = 'NO_CONSENT'; }\n  else if (truthy(a.unsubscribed)) { status = 'EXCLUDED'; reason = 'UNSUBSCRIBED'; }\n  else if (!ok) { status = 'EXCLUDED'; reason = 'COMMUNICATION_PREFERENCE'; }\n  else if (days < 21) { status = 'EXCLUDED'; reason = 'RECENTLY_CONTACTED'; }\n  let s = 0;\n  const ind = lc(a.industry);\n  if (ind && tInd.indexOf(ind) >= 0) s += 25; else if (ind && near(ind, tInd)) s += 12;\n  const ints = toList(a.interests);\n  if (ints.indexOf(topic) >= 0) s += 20; else if (near(topic, ints) || near(topic, toList(a.past_event_topics))) s += 10;\n  if (lc(a.city) && lc(a.city) === lc(ev.city)) s += 20; else if (lc(a.country) === lc(ev.country)) s += 8;\n  const si = stageIdx(a.seniority);\n  if (si >= 0 && tStage.indexOf(si) >= 0) s += 15; else if (si >= 0 && tStage.some(function(t){ return Math.abs(t - si) === 1; })) s += 8;\n  const pc = Number(a.past_event_count) || 0;\n  if (pc >= 3) s += 10; else if (pc >= 1) s += 5;\n  const fn = lc(a['function']);\n  if (fn && tFn.indexOf(fn) >= 0) s += 10; else if (fn && near(fn, tFn)) s += 5;\n  let band = s >= 80 ? 'HIGH' : (s >= 60 ? 'MEDIUM' : (s >= 40 ? 'LOW' : 'SUPPRESS'));\n  if (status !== 'ELIGIBLE') band = 'EXCLUDED';\n  return { status: status, reason: reason, score: s, band: band };\n}\nconst cases = [\n{ test_id: 'TC01', alumni_id: 'ALU001', category: 'NORMAL', input_condition: 'Mumbai BFSI senior, consented, not recently contacted', expected_status: 'ELIGIBLE', expected_band: 'HIGH' },\n{ test_id: 'TC02', alumni_id: 'ALU002', category: 'NORMAL', input_condition: 'Mumbai financial services mid-career', expected_status: 'ELIGIBLE', expected_band: 'HIGH' },\n{ test_id: 'TC03', alumni_id: 'ALU003', category: 'NORMAL', input_condition: 'Bengaluru insurance senior - strong industry weak location', expected_status: 'ELIGIBLE', expected_band: 'MEDIUM' },\n{ test_id: 'TC04', alumni_id: 'ALU004', category: 'POLICY-SENSITIVE', input_condition: 'email_consent = FALSE', expected_status: 'EXCLUDED', expected_band: 'EXCLUDED' },\n{ test_id: 'TC05', alumni_id: 'ALU005', category: 'POLICY-SENSITIVE', input_condition: 'unsubscribed = TRUE', expected_status: 'EXCLUDED', expected_band: 'EXCLUDED' },\n{ test_id: 'TC06', alumni_id: 'ALU006', category: 'POLICY-SENSITIVE', input_condition: 'Contacted 5 days ago - inside 21 day cap', expected_status: 'EXCLUDED', expected_band: 'EXCLUDED' },\n{ test_id: 'TC07', alumni_id: 'ALU007', category: 'INCOMPLETE', input_condition: 'Interests field empty', expected_status: 'ELIGIBLE', expected_band: 'MEDIUM' },\n{ test_id: 'TC08', alumni_id: 'ALU008', category: 'INCOMPLETE', input_condition: 'City missing', expected_status: 'ELIGIBLE', expected_band: 'MEDIUM' },\n{ test_id: 'TC09', alumni_id: 'ALU009', category: 'INCOMPLETE', input_condition: 'Industry function seniority interests all missing', expected_status: 'ELIGIBLE', expected_band: 'SUPPRESS' },\n{ test_id: 'TC10', alumni_id: 'ALU010', category: 'AMBIGUOUS', input_condition: 'Strong location and engagement, unrelated industry', expected_status: 'ELIGIBLE', expected_band: 'LOW' },\n{ test_id: 'TC11', alumni_id: 'ALU011', category: 'AMBIGUOUS', input_condition: 'Different country, strong industry match', expected_status: 'ELIGIBLE', expected_band: 'MEDIUM' },\n{ test_id: 'TC12', alumni_id: 'ALU012', category: 'AMBIGUOUS', input_condition: 'Strong location weak topic early career', expected_status: 'ELIGIBLE', expected_band: 'SUPPRESS' },\n{ test_id: 'TC13', alumni_id: 'ALU013', category: 'NORMAL', input_condition: 'High relevance - demo AI/QA fallback', expected_status: 'ELIGIBLE', expected_band: 'HIGH' },\n{ test_id: 'TC14', alumni_id: 'ALU014', category: 'POLICY-SENSITIVE', input_condition: 'communication_preference = phone', expected_status: 'EXCLUDED', expected_band: 'EXCLUDED' },\n{ test_id: 'TC15', alumni_id: 'ALU015', category: 'AMBIGUOUS', input_condition: 'Pune technology leader fintech interest', expected_status: 'ELIGIBLE', expected_band: 'LOW' }\n];\nconst byId = {};\n$input.all().forEach(function(i){ byId[i.json.alumni_id] = i.json; });\nconst results = cases.map(function(c){\n  const a = byId[c.alumni_id];\n  const r = a ? evaluate(a) : { status: 'MISSING', reason: 'FIXTURE_NOT_FOUND', score: 0, band: 'MISSING' };\n  const pass = r.status === c.expected_status && r.band === c.expected_band;\n  return { json: {\n    log_id: 'TEST-' + $execution.id + '-' + c.test_id,\n    timestamp: new Date().toISOString(),\n    alumni_id: c.alumni_id,\n    event_id: ev.event_id,\n    action: 'TEST_CASE_' + (pass ? 'PASS' : 'FAIL'),\n    relevance_score: r.score,\n    relevance_band: r.band,\n    personalization_confidence: '',\n    personalization_angle: c.test_id + ' / ' + c.category,\n    message_status: 'SIMULATED_TEST',\n    approval_status: 'N/A',\n    risk_flags: r.reason,\n    api_status: 'SIMULATED',\n    notes: '[SIMULATED TEST] ' + c.category + ' - ' + c.input_condition + ' | expected ' + c.expected_status + '/' + c.expected_band + ' | actual ' + r.status + '/' + r.band + ' (score ' + r.score + ') | ' + (pass ? 'PASS' : 'FAIL')\n  } };\n});\nreturn results;"
+      },
+      "id": "08c2bc2d-ca78-47cb-9815-b62697451d66",
+      "name": "Execute Test Case Matrix",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        1984
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E",
+          "mode": "list",
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2115427640,
+          "mode": "list",
+          "cachedResultName": "ENGAGEMENT_LOG",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E/edit#gid=2115427640"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "log_id",
+              "displayName": "log_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "alumni_id",
+              "displayName": "alumni_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "relevance_score",
+              "displayName": "relevance_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "relevance_band",
+              "displayName": "relevance_band",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "personalization_confidence",
+              "displayName": "personalization_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "personalization_angle",
+              "displayName": "personalization_angle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message_status",
+              "displayName": "message_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "approval_status",
+              "displayName": "approval_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "risk_flags",
+              "displayName": "risk_flags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "api_status",
+              "displayName": "api_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "42c62d22-5c6b-43b0-8c2f-5244adcc4207",
+      "name": "Write Test Results to ENGAGEMENT_LOG",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        1984
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "function fixNewlines(s){ return String(s == null ? '' : s).split('\\r\\n').join('\\n').split('\\\\n').join('\\n'); }\nconst out = [];\n$input.all().forEach(function(item){\n  const a = item.json;\n  const ev = (a.ai_input && a.ai_input.event) ? a.ai_input.event : {};\n  const facts = Array.isArray(ev.approved_facts) ? ev.approved_facts : [];\n  const conf = Number(a.personalization_confidence) || 0;\n  const flags = a.risk_flags || [];\n  const tier = (conf >= 0.8 && !flags.length) ? 'HIGH' : (conf >= 0.6 ? 'MEDIUM' : 'LOW');\n  const useTemplate = tier === 'LOW' || a.ai_status !== 'OK' || (a.unapproved_claims || []).length > 0;\n  const subject = useTemplate ? ('Invitation: ' + ev.event_name + ' - ' + ev.city) : a.email_subject;\n  let body = useTemplate ? ('Dear ' + (a.first_name || 'Alumnus') + ',\\n\\nThe Alumni Office is hosting ' + ev.event_name + ' in ' + ev.city + ' on ' + ev.event_date + '.\\n\\n' + facts.join('\\n') + '\\n\\nWe would be glad to see you there.\\n\\nAlumni Relations Office') : a.email_body;\n  body = fixNewlines(body);\n  let reason = 'AI personalised this draft with high confidence. Review and approve.';\n  if (a.ai_status !== 'OK') { reason = 'AI drafting failed - approved template used instead. Needs a closer look.'; }\n  else if ((a.unapproved_claims || []).length) { reason = 'AI used a claim not in the approved facts list - replaced with the approved template.'; }\n  else if (tier === 'LOW') { reason = 'AI reported it could not personalise this well (confidence ' + conf + ') - approved template used. Human judgement needed.'; }\n  else if (tier === 'MEDIUM') { reason = 'Moderate confidence (' + conf + '). Read the copy carefully before approving.'; }\n\n  const band = a.relevance_band === 'HIGH' ? 'HIGH' : 'MEDIUM';\n  const bandLabel = band === 'HIGH' ? 'A Strong Match For You' : 'Worth Your Consideration';\n\n  out.push({ json: Object.assign({}, a, {\n    event_name: ev.event_name,\n    event_date: ev.event_date,\n    event_time: ev.event_time || '',\n    venue: ev.venue || '',\n    event_city: ev.city,\n    event_fee: ev.event_fee || '',\n    registration_url: ev.registration_url,\n    confidence_tier: tier,\n    copy_mode: useTemplate ? 'APPROVED_TEMPLATE' : 'PERSONALIZED',\n    email_subject: subject,\n    email_body: body,\n    band_label: bandLabel,\n    claims_used: useTemplate ? facts : a.claims_used,\n    review_reason: reason\n  }) });\n});\nreturn out;"
+      },
+      "id": "2930e7e5-cba0-4a01-a659-4bd05ffa6816",
+      "name": "Prepare Draft for Review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4112,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "AlumniMatch - Plan an Alumni Event",
+        "formDescription": "The Alumni Office plans an event. Fill in what it is, when, where, who it is for, and how many invitations to send. Pre-filled with the BFSI Roundtable demo - edit anything before submitting.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "event_id",
+              "defaultValue": "EVT001",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_name",
+              "defaultValue": "BFSI Leadership Roundtable",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_description",
+              "fieldType": "textarea",
+              "defaultValue": "A networking and discussion session for alumni working in banking, financial services and insurance.",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_date",
+              "fieldType": "date",
+              "defaultValue": "2026-09-12",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_time",
+              "placeholder": "e.g. 18:30",
+              "defaultValue": "18:30"
+            },
+            {
+              "fieldLabel": "city",
+              "defaultValue": "Mumbai",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "venue",
+              "defaultValue": "Mumbai Business Centre"
+            },
+            {
+              "fieldLabel": "country",
+              "defaultValue": "India",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_topic",
+              "defaultValue": "BFSI",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "target_industries",
+              "placeholder": "Comma-separated",
+              "defaultValue": "Banking, Financial Services, Insurance"
+            },
+            {
+              "fieldLabel": "target_functions",
+              "placeholder": "Comma-separated",
+              "defaultValue": "Finance, Risk, Investment, Strategy"
+            },
+            {
+              "fieldLabel": "target_career_stages",
+              "placeholder": "Comma-separated",
+              "defaultValue": "Mid-career, Senior"
+            },
+            {
+              "fieldLabel": "target_cities",
+              "placeholder": "Comma-separated. Blank = all cities.",
+              "defaultValue": "Mumbai, Pune"
+            },
+            {
+              "fieldLabel": "batch_from",
+              "fieldType": "number",
+              "placeholder": "Earliest graduation year (0 = no limit)",
+              "defaultValue": "2005"
+            },
+            {
+              "fieldLabel": "batch_to",
+              "fieldType": "number",
+              "placeholder": "Latest graduation year (0 = no limit)",
+              "defaultValue": "2024"
+            },
+            {
+              "fieldLabel": "max_invitations",
+              "fieldType": "number",
+              "defaultValue": "10",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "approved_speakers",
+              "placeholder": "Comma-separated",
+              "defaultValue": "Speaker A, Speaker B"
+            },
+            {
+              "fieldLabel": "event_capacity",
+              "fieldType": "number",
+              "defaultValue": "100",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "registration_url",
+              "defaultValue": "https://example.com/register",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_fee",
+              "defaultValue": "Free"
+            },
+            {
+              "fieldLabel": "approved_facts",
+              "fieldType": "textarea",
+              "placeholder": "One approved fact per line - the AI may not claim anything outside this list",
+              "defaultValue": "Event takes place in Mumbai\nEvent date is 12 September 2026\nThe event focuses on BFSI\nNetworking and peer discussion are included",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "event_status",
+              "fieldType": "dropdown",
+              "defaultValue": "OPEN",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "OPEN"
+                  },
+                  {
+                    "option": "CLOSED"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "communications_approved",
+              "fieldType": "dropdown",
+              "defaultValue": "TRUE",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "TRUE"
+                  },
+                  {
+                    "option": "FALSE"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Thanks. AlumniMatch is now filtering the alumni list, drafting invitations, and sending them to the Alumni Relations Manager for approval. Nothing goes out until a person approves it."
+            }
+          }
+        }
+      },
+      "id": "ca711ceb-a990-4d8a-a0ea-bc6dd4b13357",
+      "name": "New Alumni Event",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -400,
+        304
+      ],
+      "webhookId": "c860d7af-2ed8-4419-bc6e-8f385fca9467"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7fe52195-a6d2-4475-a525-7c55408cf933",
+      "name": "Loop Alumni (1 at a time)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        4384,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "INVITATION_SENT",
+              "id": "56a27f10-4d1c-4ba8-9fde-2d3f3a057a2a"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c77ae7f4-8b63-4e45-b654-0abba75c890b",
+      "name": "Sent Successfully?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7440,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.no_candidates }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "8826e550-50d7-4692-b345-d8a215a718f5",
+      "name": "Any Candidates?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2912,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "mba25kamisetti@iimk.ac.in",
+        "subject": "=[AlumniMatch] No alumni qualified - {{ $json.event_name }}",
+        "emailType": "text",
+        "message": "=No alumni met the relevance threshold for this event, so no invitations were drafted and nothing needs your approval.\n\nEvent: {{ $json.event_name }} ({{ $json.event_id }}) in {{ $json.event_city }}\nAlumni who passed the hard eligibility rules (consent, opt-out, 21-day cap, city, batch): {{ $json.eligible_count }}\nHighest relevance score among them: {{ $json.best_score }} / 100 (invitations require at least {{ $json.threshold }})\n\nTop candidates by score:\n{{ $json.top_candidates.join(\"\\n\") }}\n\nYou may want to widen the targeting (industries, functions, career stages, cities, or batch range) and resubmit the event form.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "4f3313a9-138d-4d1d-9514-58a03b4faabc",
+      "name": "Notify Alumni Team - No Candidates",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2848,
+        448
+      ],
+      "webhookId": "2c05a7e2-3912-4e0e-9a4d-b72ff4f74845",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HueunVHcYvfwE7DI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "SEND_FAILED"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "689dcba7-1cae-43b3-a368-293e57696927",
+      "name": "Was Delivery Failure?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7664,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "mba25kamisetti@iimk.ac.in",
+        "subject": "=[AlumniMatch] Delivery failed - {{ $json.alumni_id }}",
+        "emailType": "text",
+        "message": "=An approved invitation could not be delivered after 3 attempts.\n\nAlumni ID: {{ $json.alumni_id }}\nEvent ID: {{ $json.event_id }}\n\n{{ $json.notes }}\n\nManual follow-up required - consider sending this invitation by hand.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "24ae3639-deb5-4e12-a04c-37bc52de186c",
+      "name": "Notify Alumni Team - Send Failure",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        7888,
+        464
+      ],
+      "webhookId": "b2575c94-c0fc-432c-8e05-a46b7d31b062",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HueunVHcYvfwE7DI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "={{ \"mba25kamisetti@iimk.ac.in\" }}",
+        "subject": "=[AlumniMatch] Approve invitation - {{ $json.first_name }} ({{ $json.alumni_id }}) - score {{ $json.relevance_score }}",
+        "message": "={{ $json.approval_html }}",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Subject",
+              "defaultValue": "={{ $json.email_subject }}",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Body",
+              "fieldType": "textarea",
+              "defaultValue": "={{ $json.email_body }}",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Decision",
+              "fieldType": "dropdown",
+              "defaultValue": "Approve",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approve"
+                  },
+                  {
+                    "option": "Reject"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "messageButtonLabel": "Review & Respond",
+          "responseFormTitle": "Review & Approve Invitation",
+          "responseFormDescription": "Edit the subject or body below if you want to change the wording, then choose your decision.",
+          "responseFormButtonLabel": "Submit",
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 2,
+              "resumeUnit": "days"
+            }
+          },
+          "appendAttribution": false
+        }
+      },
+      "id": "d82f0771-e558-4aeb-9cd7-ee963fd0a040",
+      "name": "Request Alumni Manager Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        6128,
+        208
+      ],
+      "webhookId": "97512da8-3d70-4065-a031-9c9210504c65",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hqQItkR5aDiq0ADP",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }\nfunction fixNewlines(s){ return String(s == null ? '' : s).split('\\r\\n').join('\\n').split('\\\\n').join('\\n'); }\nconst out = [];\n$input.all().forEach(function(item){\n  const a = item.json;\n  const body = fixNewlines(a.email_body);\n  const band = a.relevance_band === 'HIGH' ? 'HIGH' : 'MEDIUM';\n  const gradStart = band === 'HIGH' ? '#f59e0b' : '#6366f1';\n  const gradEnd = band === 'HIGH' ? '#ef4444' : '#06b6d4';\n  const bandLabel = band === 'HIGH' ? 'A Strong Match For You' : 'Worth Your Consideration';\n  const initials = (a.first_name || a.alumni_id || 'AL').trim().slice(0, 2).toUpperCase();\n  const base = 'https://aruntejapersonal.app.n8n.cloud/webhook/alumni-rsvp';\n  const rsvpYes = base + '?alumni_id=' + encodeURIComponent(a.alumni_id) + '&event_id=' + encodeURIComponent(a.event_id) + '&action=RSVP_YES';\n  const rsvpNo = base + '?alumni_id=' + encodeURIComponent(a.alumni_id) + '&event_id=' + encodeURIComponent(a.event_id) + '&action=RSVP_NO';\n  const rsvpUnsub = base + '?alumni_id=' + encodeURIComponent(a.alumni_id) + '&event_id=' + encodeURIComponent(a.event_id) + '&action=UNSUBSCRIBE';\n  const emailHtml = '<div style=\"font-family:\\'Segoe UI\\',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">' +\n    '<div style=\"background:linear-gradient(135deg,' + gradStart + ',' + gradEnd + ');padding:36px 28px;text-align:center;\">' +\n      '<div style=\"width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.25);color:#fff;font-weight:700;font-size:20px;line-height:56px;margin:0 auto 14px;\">' + esc(initials) + '</div>' +\n      '<div style=\"color:#fff;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9;\">' + esc(bandLabel) + '</div>' +\n      '<div style=\"color:#fff;font-size:22px;font-weight:700;margin-top:4px;\">' + esc(a.event_name) + '</div>' +\n    '</div>' +\n    '<div style=\"padding:28px;\">' +\n      '<div style=\"white-space:pre-wrap;color:#1f2937;font-size:15px;line-height:1.65;\">' + esc(body) + '</div>' +\n      '<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-top:22px;background:#f9fafb;border-radius:10px;border:1px solid #eef0f2;\"><tr><td style=\"padding:16px 18px;\">' +\n        '<div style=\"font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;\">Event details</div>' +\n        '<div style=\"font-size:15px;color:#111827;font-weight:600;\">' + esc(a.event_name) + '</div>' +\n        '<div style=\"font-size:14px;color:#374151;margin-top:4px;\">' + esc(a.event_date) + ' at ' + esc(a.event_time || '') + ' &middot; ' + esc(a.venue || '') + ', ' + esc(a.event_city) + '</div>' +\n        '<div style=\"font-size:14px;color:#374151;\">Fee: ' + esc(a.event_fee || 'Free') + '</div>' +\n      '</td></tr></table>' +\n      '<div style=\"text-align:center;margin-top:26px;\">' +\n        '<a href=\"' + rsvpYes + '\" style=\"display:inline-block;background:#16a34a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:12px 26px;border-radius:8px;margin:0 6px 10px;\">Yes, register me</a>' +\n        '<a href=\"' + rsvpNo + '\" style=\"display:inline-block;background:#f3f4f6;color:#374151;text-decoration:none;font-weight:600;font-size:14px;padding:12px 26px;border-radius:8px;margin:0 6px 10px;border:1px solid #d1d5db;\">Cannot attend</a>' +\n      '</div>' +\n    '</div>' +\n    '<div style=\"background:#f9fafb;padding:16px 28px;text-align:center;font-size:12px;color:#9ca3af;border-top:1px solid #eef0f2;\">' +\n      'You are receiving this because you opted in to alumni event updates.<br/>' +\n      '<a href=\"' + rsvpUnsub + '\" style=\"color:#9ca3af;\">Unsubscribe from future invitations</a>' +\n    '</div>' +\n  '</div>';\n  out.push({ json: Object.assign({}, a, { email_html: emailHtml, email_body: body }) });\n});\nreturn out;"
+      },
+      "id": "3770a676-e504-4583-b2e2-b86cf0ad66a8",
+      "name": "Finalize Approved Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6784,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "INVITE_QUEUE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": true,
+              "display": true,
+              "displayName": "queue_id",
+              "id": "queue_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "event_id",
+              "id": "event_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "alumni_id",
+              "id": "alumni_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "first_name",
+              "id": "first_name",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "email",
+              "id": "email",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "city",
+              "id": "city",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "country",
+              "id": "country",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "graduation_year",
+              "id": "graduation_year",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "industry",
+              "id": "industry",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "function",
+              "id": "function",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "seniority",
+              "id": "seniority",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "relevance_score",
+              "id": "relevance_score",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "relevance_band",
+              "id": "relevance_band",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "score_breakdown",
+              "id": "score_breakdown",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "matched_signals",
+              "id": "matched_signals",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "unmatched_signals",
+              "id": "unmatched_signals",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "travel_situation",
+              "id": "travel_situation",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "queue_status",
+              "id": "queue_status",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "queued_at",
+              "id": "queued_at",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "alumni_id": "={{ $json.alumni_id }}",
+            "city": "={{ $json.city }}",
+            "country": "={{ $json.country }}",
+            "email": "={{ $json.email }}",
+            "event_id": "={{ $json.event_id }}",
+            "first_name": "={{ $json.first_name }}",
+            "function": "={{ $json['function'] }}",
+            "graduation_year": "={{ $json.graduation_year }}",
+            "industry": "={{ $json.industry }}",
+            "matched_signals": "={{ ($json.matched_signals || []).join('; ') }}",
+            "queue_id": "={{ $json.queue_id }}",
+            "queue_status": "={{ $json.queue_status }}",
+            "queued_at": "={{ $now.toISO() }}",
+            "relevance_band": "={{ $json.relevance_band }}",
+            "relevance_score": "={{ $json.relevance_score }}",
+            "score_breakdown": "={{ JSON.stringify($json.score_breakdown) }}",
+            "seniority": "={{ $json.seniority }}",
+            "travel_situation": "={{ $json.travel_situation }}",
+            "unmatched_signals": "={{ ($json.unmatched_signals || []).join('; ') }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "8c86cf50-23df-49a8-a27b-6bc725bfeb32",
+      "name": "Write Invite Queue",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3120,
+        48
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.queue_status }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "INVITED"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "df102d63-3e65-443f-8c64-26c14ba941bb",
+      "name": "Filter to Invited Only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        3264,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "rd1",
+              "name": "queued_for_ai",
+              "type": "boolean",
+              "value": true
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "69569923-6db7-41cf-8dd0-1ac99ab47188",
+      "name": "Ready for AI Personalization",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3168,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(function(i){ return i.json; }).filter(function(r){ return r && String(r.queue_status || '').toUpperCase() === 'WAITLIST'; });\nif (!rows.length) { return []; }\nrows.sort(function(a, b){ return (Number(b.relevance_score) || 0) - (Number(a.relevance_score) || 0); });\nreturn [{ json: rows[0] }];"
+      },
+      "id": "43368f24-5cc0-473c-82e4-612bf1ffac1e",
+      "name": "Pick Next Waitlist Candidate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        1616
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "INVITE_QUEUE"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "event_id",
+              "lookupValue": "={{ $('Normalize RSVP Payload').item.json.event_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a379e1d-8830-4b5e-9954-d40274573c20",
+      "name": "Read Invite Queue for Event",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        1360
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "INVITE_QUEUE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "queue_id"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": true,
+              "display": true,
+              "displayName": "queue_id",
+              "id": "queue_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "queue_status",
+              "id": "queue_status",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "queue_id": "={{ $json.queue_id }}",
+            "queue_status": "PROMOTED"
+          }
+        },
+        "options": {}
+      },
+      "id": "0d1aa047-8199-4156-a366-7c11241bdd2a",
+      "name": "Mark Candidate Promoted",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        1568
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "ALUMNI_CRM"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "alumni_id",
+              "lookupValue": "={{ $('Pick Next Waitlist Candidate').item.json.alumni_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c855e5bb-b132-4156-92ac-46de787b67a5",
+      "name": "Read Promoted Alumnus Fresh Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        1568
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.email_consent }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "TRUE"
+            },
+            {
+              "leftValue": "={{ $json.unsubscribed }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "string"
+              },
+              "rightValue": "TRUE"
+            }
+          ],
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "6055592a-0a43-452d-953e-c487a136e9c0",
+      "name": "Still Eligible?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "EVENTS_DB"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "event_id",
+              "lookupValue": "={{ $('Normalize RSVP Payload').item.json.event_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e2736544-2964-43d5-b8e3-95cb803e8999",
+      "name": "Read Event for Promotion",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        1488
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const q = $('Pick Next Waitlist Candidate').first().json;\nconst alum = $input.first().json;\nconst ev = $('Read Event for Promotion').first().json;\nfunction toArr(v){ if (Array.isArray(v)) return v; if (typeof v === 'string' && v.trim()) return v.split(/[|,]+/).map(function(s){ return s.trim(); }).filter(Boolean); return []; }\nconst approvedFacts = toArr(ev.approved_facts);\nconst approvedSpeakers = toArr(ev.approved_speakers);\nconst travel = (String(alum.city || '').toLowerCase() === String(ev.city || '').toLowerCase()) ? 'LOCAL' : (String(alum.country || '').toLowerCase() === String(ev.country || '').toLowerCase() ? 'DOMESTIC_TRAVEL' : 'INTERNATIONAL_TRAVEL');\nlet scoreBreakdown = {};\ntry { scoreBreakdown = JSON.parse(q.score_breakdown || '{}'); } catch (e) { scoreBreakdown = {}; }\nconst matchedSignals = toArr(q.matched_signals);\nconst unmatchedSignals = toArr(q.unmatched_signals);\nconst out = Object.assign({}, alum, {\n  event_id: ev.event_id,\n  relevance_score: Number(q.relevance_score) || 0,\n  relevance_band: q.relevance_band,\n  score_breakdown: scoreBreakdown,\n  matched_signals: matchedSignals,\n  unmatched_signals: unmatchedSignals,\n  travel_situation: travel,\n  scoring_model: 'relevance-v1.0 (waitlist promotion)',\n  scored_by: 'DETERMINISTIC_ENGINE',\n  no_candidates: false,\n  ai_input: {\n    alumni: { alumni_id: alum.alumni_id, first_name: alum.first_name || '', city: alum.city || '', country: alum.country || '', graduation_year: alum.graduation_year || '', industry: alum.industry || '', job_function: alum['function'] || '', seniority: alum.seniority || '', interests: alum.interests || '', past_event_count: Number(alum.past_event_count) || 0, past_event_topics: alum.past_event_topics || '', chapter: alum.chapter || '', profile_gaps: [] },\n    event: { event_id: ev.event_id, event_name: ev.event_name, event_description: ev.event_description, event_date: ev.event_date, event_time: ev.event_time || '', city: ev.city, venue: ev.venue || '', country: ev.country, event_topic: ev.event_topic, event_fee: ev.event_fee || '', registration_url: ev.registration_url, approved_facts: approvedFacts, approved_speakers: approvedSpeakers },\n    deterministic_scoring: { relevance_score: Number(q.relevance_score) || 0, relevance_band: q.relevance_band, score_breakdown: scoreBreakdown, matched_signals: matchedSignals, unmatched_signals: unmatchedSignals, travel_situation: travel }\n  }\n});\nreturn [{ json: out }];"
+      },
+      "id": "2c97ceb2-8f09-4048-9375-676fbe2b9eb2",
+      "name": "Build Promoted Candidate ai_input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        1488
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "ALUMNI_CRM"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "alumni_id",
+              "lookupValue": "={{ $json.alumni_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8c6ece0-4e41-4b47-a4ba-2c483024d416",
+      "name": "Read Alumnus for RSVP",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        1248
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 1,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "cachedResultName": "EVENT_REGISTRATIONS",
+          "mode": "list",
+          "value": 134341779
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "attendance_status"
+          ]
+        }
+      },
+      "id": "6373e3bf-ce1d-4374-9fcc-8d71d0f801a5",
+      "name": "Attendance Marked Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        2400
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "suAqiOev1kpVPs7X",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.attendance_status }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "ATTENDED",
+              "id": "b746ca95-ac83-4cb8-903b-6cecafe2f0e6"
+            },
+            {
+              "leftValue": "={{ $json.thank_you_sent }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "string"
+              },
+              "rightValue": "TRUE",
+              "id": "af579776-77af-4f49-9a40-f4bfb1134914"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "30c3b61f-e560-46d1-ae54-5e015290f280",
+      "name": "Just Attended?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "ALUMNI_CRM"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "alumni_id",
+              "lookupValue": "={{ $('Attendance Marked Trigger').item.json.alumni_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e77e3e76-ecb5-46b3-8551-b6817834f767",
+      "name": "Read Alumnus for Thank You",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        48,
+        2320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "EVENTS_DB"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "event_id",
+              "lookupValue": "={{ $('Attendance Marked Trigger').item.json.event_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3e1fa95f-91f0-4743-89c8-a77b537d45ba",
+      "name": "Read Event for Thank You",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        2320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function esc(s){ return String(s == null ? '' : s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;'); }\nconst reg = $('Attendance Marked Trigger').first().json;\nconst alum = $('Read Alumnus for Thank You').first().json;\nconst ev = $('Read Event for Thank You').first().json;\nconst initials = (alum.first_name || 'AL').trim().slice(0, 2).toUpperCase();\nconst html = '<div style=\"font-family:\\'Segoe UI\\',Arial,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">' +\n  '<div style=\"background:linear-gradient(135deg,#059669,#10b981);padding:36px 28px;text-align:center;\">' +\n    '<div style=\"width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.25);color:#fff;font-weight:700;font-size:20px;line-height:56px;margin:0 auto 14px;\">' + esc(initials) + '</div>' +\n    '<div style=\"color:#fff;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.9;\">Thank You</div>' +\n    '<div style=\"color:#fff;font-size:22px;font-weight:700;margin-top:4px;\">It Was Great Having You</div>' +\n  '</div>' +\n  '<div style=\"padding:28px;\">' +\n    '<div style=\"color:#1f2937;font-size:15px;line-height:1.65;\">Dear ' + esc(alum.first_name || 'Alumnus') + ',<br/><br/>Thank you for attending <b>' + esc(ev.event_name) + '</b>. We hope you enjoyed reconnecting with fellow alumni and found the discussion valuable.<br/><br/>We look forward to seeing you at future events.<br/><br/>Warm regards,<br/>Alumni Relations Office</div>' +\n  '</div>' +\n  '<div style=\"background:#f9fafb;padding:16px 28px;text-align:center;font-size:12px;color:#9ca3af;border-top:1px solid #eef0f2;\">AlumniMatch &middot; Alumni Relations Office</div>' +\n'</div>';\nreturn [{ json: { thank_you_html: html, alumni_id: reg.alumni_id, event_id: reg.event_id, email: reg.email, registration_id: reg.registration_id, event_name: ev.event_name } }];"
+      },
+      "id": "4ba9c615-3b68-40f4-85bc-f287490796da",
+      "name": "Build Thank You Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        2320
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Thank you for joining {{ $json.event_name }}!",
+        "message": "={{ $json.thank_you_html }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Alumni Relations Office"
+        }
+      },
+      "id": "7c20e8a4-8e23-4e80-b9be-542909ba01bb",
+      "name": "Send Thank You Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        2320
+      ],
+      "webhookId": "1beb799c-1f8b-477f-90da-43cb6e7bfe34",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HueunVHcYvfwE7DI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "cachedResultName": "AlumniMatch Synthetic DB",
+          "mode": "list",
+          "value": "1MVdQ1GqhnVTqriGi7YcmUttTwnIBt-ho1Iq48Azem0E"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "EVENT_REGISTRATIONS"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "registration_id"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": true,
+              "display": true,
+              "displayName": "registration_id",
+              "id": "registration_id",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": false,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "thank_you_sent",
+              "id": "thank_you_sent",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "registration_id": "={{ $json.registration_id }}",
+            "thank_you_sent": "TRUE"
+          }
+        },
+        "options": {}
+      },
+      "id": "45dae4c1-4a92-4301-9cb4-c769c8516e45",
+      "name": "Mark Thank You Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        2320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4NQQgTKBzCcMDKRo",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Validate Event Payload": {
+      "main": [
+        [
+          {
+            "node": "Event Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Valid?": {
+      "main": [
+        [
+          {
+            "node": "Upsert EVENTS_DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read EVENT_REGISTRATIONS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Alumni Team - Invalid Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read EVENT_REGISTRATIONS": {
+      "main": [
+        [
+          {
+            "node": "Compute Capacity Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Capacity Status": {
+      "main": [
+        [
+          {
+            "node": "Campaign Policy Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read ALUMNI_CRM": {
+      "main": [
+        [
+          {
+            "node": "Apply Hard Eligibility Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Hard Eligibility Rules": {
+      "main": [
+        [
+          {
+            "node": "Score Event Relevance",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personalization LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Personalization Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personalization Output Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Personalization Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Personalization Agent": {
+      "main": [
+        [
+          {
+            "node": "Normalize Personalization Output",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Fallback - Conservative Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Approval Decision": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Finalize Approved Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compose Rejection Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Personalized Invitation": {
+      "main": [
+        [
+          {
+            "node": "Compose Sent Log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Compose Sent Log": {
+      "main": [
+        [
+          {
+            "node": "Append Sent Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSVP / Response Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize RSVP Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSVP Action Router": {
+      "main": [
+        [
+          {
+            "node": "Read EVENTS_DB Row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Decline Record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Invite Queue for Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update ALUMNI_CRM - Opt Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to RSVP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read EVENTS_DB Row": {
+      "main": [
+        [
+          {
+            "node": "Read Registrations for RSVP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Registrations for RSVP": {
+      "main": [
+        [
+          {
+            "node": "Evaluate RSVP Capacity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate RSVP Capacity": {
+      "main": [
+        [
+          {
+            "node": "Upsert EVENT_REGISTRATIONS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Compose RSVP Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Decline Record": {
+      "main": [
+        [
+          {
+            "node": "Upsert EVENT_REGISTRATIONS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Compose RSVP Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update ALUMNI_CRM - Opt Out": {
+      "main": [
+        [
+          {
+            "node": "Compose RSVP Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose RSVP Log": {
+      "main": [
+        [
+          {
+            "node": "Append RSVP Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append RSVP Log": {
+      "main": [
+        [
+          {
+            "node": "Respond to RSVP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed Data & Run Test Matrix": {
+      "main": [
+        [
+          {
+            "node": "Synthetic Alumni Fixtures (15)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthetic Alumni Fixtures (15)": {
+      "main": [
+        [
+          {
+            "node": "Seed ALUMNI_CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execute Test Case Matrix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Test Case Matrix": {
+      "main": [
+        [
+          {
+            "node": "Write Test Results to ENGAGEMENT_LOG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campaign Policy Gate": {
+      "main": [
+        [
+          {
+            "node": "Read ALUMNI_CRM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Alumni Team - Campaign Stopped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Personalization Output": {
+      "main": [
+        [
+          {
+            "node": "Prepare Draft for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Fallback - Conservative Template": {
+      "main": [
+        [
+          {
+            "node": "Prepare Draft for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Rejection Log": {
+      "main": [
+        [
+          {
+            "node": "Append Sent Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Alumni Event": {
+      "main": [
+        [
+          {
+            "node": "Validate Event Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Draft for Review": {
+      "main": [
+        [
+          {
+            "node": "Loop Alumni (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Alumni (1 at a time)": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Build Approval Packet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Sent Log": {
+      "main": [
+        [
+          {
+            "node": "Sent Successfully?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sent Successfully?": {
+      "main": [
+        [
+          {
+            "node": "Update ALUMNI_CRM After Send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Was Delivery Failure?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update ALUMNI_CRM After Send": {
+      "main": [
+        [
+          {
+            "node": "Loop Alumni (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Event Relevance": {
+      "main": [
+        [
+          {
+            "node": "Any Candidates?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Candidates?": {
+      "main": [
+        [
+          {
+            "node": "Write Invite Queue",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter to Invited Only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Alumni Team - No Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was Delivery Failure?": {
+      "main": [
+        [
+          {
+            "node": "Notify Alumni Team - Send Failure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Alumni (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Alumni Team - Send Failure": {
+      "main": [
+        [
+          {
+            "node": "Loop Alumni (1 at a time)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Approval Packet": {
+      "main": [
+        [
+          {
+            "node": "Request Alumni Manager Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Alumni Manager Approval": {
+      "main": [
+        [
+          {
+            "node": "Resolve Approval Decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finalize Approved Email": {
+      "main": [
+        [
+          {
+            "node": "Send Personalized Invitation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter to Invited Only": {
+      "main": [
+        [
+          {
+            "node": "Ready for AI Personalization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ready for AI Personalization": {
+      "main": [
+        [
+          {
+            "node": "AI Personalization Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invite Queue for Event": {
+      "main": [
+        [
+          {
+            "node": "Pick Next Waitlist Candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Next Waitlist Candidate": {
+      "main": [
+        [
+          {
+            "node": "Mark Candidate Promoted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Candidate Promoted": {
+      "main": [
+        [
+          {
+            "node": "Read Promoted Alumnus Fresh Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Promoted Alumnus Fresh Data": {
+      "main": [
+        [
+          {
+            "node": "Still Eligible?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still Eligible?": {
+      "main": [
+        [
+          {
+            "node": "Read Event for Promotion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Event for Promotion": {
+      "main": [
+        [
+          {
+            "node": "Build Promoted Candidate ai_input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Promoted Candidate ai_input": {
+      "main": [
+        [
+          {
+            "node": "Ready for AI Personalization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize RSVP Payload": {
+      "main": [
+        [
+          {
+            "node": "Read Alumnus for RSVP",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSVP Action Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendance Marked Trigger": {
+      "main": [
+        [
+          {
+            "node": "Just Attended?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Just Attended?": {
+      "main": [
+        [
+          {
+            "node": "Read Alumnus for Thank You",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Alumnus for Thank You": {
+      "main": [
+        [
+          {
+            "node": "Read Event for Thank You",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Event for Thank You": {
+      "main": [
+        [
+          {
+            "node": "Build Thank You Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Thank You Email": {
+      "main": [
+        [
+          {
+            "node": "Send Thank You Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Thank You Email": {
+      "main": [
+        [
+          {
+            "node": "Mark Thank You Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "96109cf0-0950-4f25-b486-c56f52c47843",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "939940d44732b8cfff7aab273ff51eb805ca9209e9f1e04d13532a883ebfdb99"
+  },
+  "nodeGroups": [
+    {
+      "id": "d0f65d33-74b4-4ff8-af5e-a9dd312a5d09",
+      "name": "SECTION 5-6: ELIGIBILITY & RELEVANCE SCORING",
+      "nodeIds": [
+        "41896085-8c94-4097-953c-df343f2a6865",
+        "9720a3a9-e0bd-4ab8-b11e-f825d416610d",
+        "f699242a-5e72-4d63-bc91-a6a8f766100a"
+      ],
+      "description": "Rules 1-4 run per alumnus before any AI. Then 0-100 score (25/20/20/15/10/10), bands 80/60/40. HIGH+MEDIUM proceed to AI."
+    }
+  ],
+  "id": "rTzimgs2yRbndntG",
+  "tags": []
+}
